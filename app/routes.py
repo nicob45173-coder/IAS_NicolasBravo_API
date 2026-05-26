@@ -12,7 +12,7 @@ def home():
 # Healthcheck
 @main.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "API funcionando"}), 200
+    return jsonify({"status": "ok"}), 200
 
 
 #  READ ALL
