@@ -1,9 +1,27 @@
 from flask import Flask
+from .routes import main
+from .database import db
+import os
 
-def create_app():
+def create_app(test_config=None):
+
     app = Flask(__name__)
 
-    from .routes import main
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+        "DATABASE_URL",
+        "sqlite:///users.db"
+    )
+
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    if test_config:
+        app.config.update(test_config)
+
+    db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
+
     app.register_blueprint(main)
 
     return app

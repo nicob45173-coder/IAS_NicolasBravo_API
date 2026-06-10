@@ -1,15 +1,21 @@
-import sys
-import os
 import pytest
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app import create_app
-from app.models import reset_users
+from app.database import db
+
 @pytest.fixture
 def client():
-    reset_users()
-    app = create_app()
-    app.config["TESTING"] = True
 
-    with app.test_client() as client:
-        yield client
+    app = create_app()
+
+    app.config["TESTING"] = True
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+
+    with app.app_context():
+        db.create_all()
+
+        with app.test_client() as client:
+            yield client
+
+        db.session.remove()
+        db.drop_all()

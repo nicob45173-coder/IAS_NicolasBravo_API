@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
-from .models import users
+from .models import User
+from .database import db
 
 main = Blueprint("main", __name__)
 
@@ -18,51 +19,69 @@ def health():
 #  READ ALL
 @main.route("/users", methods=["GET"])
 def get_users():
-    return jsonify(users), 200
+
+    users = User.query.all()
+
+    return jsonify(
+        [user.to_dict() for user in users]
+    ), 200
 
 
 #  READ ONE
 @main.route("/users/<int:user_id>", methods=["GET"])
 def get_user(user_id):
-    for user in users:
-        if user["id"] == user_id:
-            return jsonify(user), 200
-    return jsonify({"error": "User not found"}), 404
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify(user.to_dict()), 200
 
 
-#  CREATE
+# CREATE
 @main.route("/users", methods=["POST"])
 def create_user():
+
     data = request.json
 
-    new_user = {
-        "id": len(users) + 1,
-        "name": data.get("name")
-    }
+    new_user = User(
+        name=data.get("name")
+    )
 
-    users.append(new_user)
-    return jsonify(new_user), 201
+    db.session.add(new_user)
+    db.session.commit()
 
-
+    return jsonify(
+        new_user.to_dict()
+    ), 201
 #  UPDATE
 @main.route("/users/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
     data = request.json
 
-    for user in users:
-        if user["id"] == user_id:
-            user["name"] = data.get("name", user["name"])
-            return jsonify(user), 200
+    user.name = data.get("name", user.name)
 
-    return jsonify({"error": "User not found"}), 404
+    db.session.commit()
 
+    return jsonify(user.to_dict()), 200
 
 #  DELETE
 @main.route("/users/<int:user_id>", methods=["DELETE"])
 def delete_user(user_id):
-    for user in users:
-        if user["id"] == user_id:
-            users.remove(user)
-            return jsonify({"message": "Deleted"}), 200
 
-    return jsonify({"error": "User not found"}), 404
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+
+    return jsonify({"message": "Deleted"}), 200
