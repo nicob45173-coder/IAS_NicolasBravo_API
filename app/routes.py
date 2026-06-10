@@ -13,7 +13,7 @@ def home():
 # Healthcheck
 @main.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "Estoy ok"}), 200
+    return jsonify({"status": "Estoy re piola compa"}), 200
 
 
 
