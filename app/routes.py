@@ -16,6 +16,8 @@ def health():
     return jsonify({"status": "Estoy ok"}), 200
 
 
+
+
 #  READ ALL
 @main.route("/users", methods=["GET"])
 def get_users():
