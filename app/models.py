@@ -1,4 +1,13 @@
-users = [{"id": 1, "name": "Nico"}]
-def reset_users():
-    global users
-    users = [{"id": 1, "name": "Nico"}]
+from .database import db
+
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name
+        }
