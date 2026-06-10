@@ -1,4 +1,4 @@
-flask
+-r requirements.txt
+
 pytest
 bandit
-gunicorn
